@@ -71,7 +71,7 @@ namespace GeoComment.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<Comment>> FindComments([FromQuery] int? minLon, [FromQuery] int? maxLon, [FromQuery] int? minLat, [FromQuery] int? maxLat)
+        public async Task<ActionResult<Comment>> FindComments([FromQuery] decimal? minLon, [FromQuery] decimal? maxLon, [FromQuery] decimal? minLat, [FromQuery] decimal? maxLat)
         {
             if (minLon is null || maxLon is null || minLat is null ||
                 maxLat is null) return BadRequest();
