@@ -10,6 +10,17 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+/*
+builder.Services.AddApiVersioning(options =>
+{
+    options.ApiVersionReader =
+        new QueryStringApiVersionReader("api-version");
+    options.ReportApiVersions = true;
+    options.DefaultApiVersion = new ApiVersion(1, 1);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+});
+*/
+
 builder.Services.AddDbContext<GeoCommentsDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -27,5 +38,13 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var ctx = scope.ServiceProvider
+        .GetRequiredService<GeoCommentsDBContext>();
+
+    ctx.Database.EnsureCreated();
+}
 
 app.Run();
