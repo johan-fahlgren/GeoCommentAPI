@@ -11,13 +11,14 @@ namespace GeoComment.Controllers
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly ILogger<GeoCommentsDBContext> _logger;
 
-        public TestController(GeoCommentsDBContext dbContext, ILogger<GeoCommentsDBContext> logger)
+        public TestController(GeoCommentsDBContext dbContext, ILogger<GeoCommentsDBContext> logger, IWebHostEnvironment webHostEnvironment)
         {
             _dbContext = dbContext;
             _logger = logger;
+            _webHostEnvironment = webHostEnvironment;
         }
 
-        [ApiVersion("0.1")]
+        //[ApiVersion("0.1")]
         [Route("reset-db")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]

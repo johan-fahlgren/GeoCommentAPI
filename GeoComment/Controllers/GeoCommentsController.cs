@@ -17,7 +17,7 @@ namespace GeoComment.Controllers
             _dbContext = dbContext;
         }
 
-        [ApiVersion("0.1")]
+        //[ApiVersion("0.1")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -34,7 +34,7 @@ namespace GeoComment.Controllers
             return CreatedAtAction(nameof(GetComment), new { id = comment.Id }, comment);
         }
 
-        [ApiVersion("0.1")]
+        //[ApiVersion("0.1")]
         [HttpGet]
         [Route("{id:int}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -50,7 +50,7 @@ namespace GeoComment.Controllers
             return comment;
         }
 
-        [ApiVersion("0.1")]
+        //[ApiVersion("0.1")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
