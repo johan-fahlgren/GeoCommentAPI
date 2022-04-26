@@ -23,16 +23,33 @@ namespace GeoComment.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
 
         public async Task<ActionResult<Comment>> AddComment(
-            Comment comment)
+            NewComment newComment)
         {
-            if (string.IsNullOrWhiteSpace(comment.Author) || string.IsNullOrWhiteSpace(comment.Message))
+            if (string.IsNullOrWhiteSpace(newComment.Author) || string.IsNullOrWhiteSpace(newComment.Message))
                 return BadRequest();
+
+            var comment = new Comment()
+            {
+                Author = newComment.Author,
+                Message = newComment.Message,
+                Longitude = newComment.Longitude,
+                Latitude = newComment.Latitude,
+            };
 
             await _dbContext.Comments.AddAsync(comment);
             await _dbContext.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetComment), new { id = comment.Id }, comment);
         }
+
+        public class NewComment
+        {
+            public string Message { get; set; }
+            public string Author { get; set; }
+            public decimal Longitude { get; set; }
+            public decimal Latitude { get; set; }
+        }
+
 
         //[ApiVersion("0.1")]
         [HttpGet]
@@ -47,7 +64,7 @@ namespace GeoComment.Controllers
                 return NotFound();
             }
 
-            return comment;
+            return Ok(comment);
         }
 
         //[ApiVersion("0.1")]
@@ -73,4 +90,6 @@ namespace GeoComment.Controllers
 
 
     }
+
+
 }
