@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "GeoComment": {
+    "GeoComment Dev": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
@@ -19,6 +19,17 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
+    "GeoComment Pro": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "applicationUrl": "https://localhost:8000;http://localhost:8001",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production"
+      }
+    },
+
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,

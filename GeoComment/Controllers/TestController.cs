@@ -8,10 +8,13 @@ namespace GeoComment.Controllers
     public class TestController : ControllerBase
     {
         private readonly GeoCommentsDBContext _dbContext;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly ILogger<GeoCommentsDBContext> _logger;
 
-        public TestController(GeoCommentsDBContext dbContext)
+        public TestController(GeoCommentsDBContext dbContext, ILogger<GeoCommentsDBContext> logger)
         {
             _dbContext = dbContext;
+            _logger = logger;
         }
 
         [ApiVersion("0.1")]
@@ -22,15 +25,38 @@ namespace GeoComment.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> ReCreateDatabase()
         {
-            var deleted =
-                await _dbContext.Database.EnsureDeletedAsync();
-            var reCreated =
-                await _dbContext.Database.EnsureCreatedAsync();
+            if (_webHostEnvironment.IsDevelopment())
+            {
+                try
+                {
+                    var deleted =
+                        await _dbContext.Database.EnsureDeletedAsync();
+                    if (!deleted) return NotFound();
+                }
+                catch (OperationCanceledException e)
+                {
 
-            if (!deleted) return NotFound();
-            if (!reCreated) return BadRequest();
+                    _logger.LogError("Database not deleted", e);
+                    return BadRequest();
+                }
 
-            return Ok();
+                try
+                {
+                    var reCreated = await _dbContext.Database.EnsureCreatedAsync();
+                    if (!reCreated) return NotFound();
+                }
+                catch (OperationCanceledException e)
+                {
+                    _logger.LogError("Database not created", e);
+                    return BadRequest();
+
+                }
+
+                return Ok();
+            }
+
+            return BadRequest();
+
         }
 
 

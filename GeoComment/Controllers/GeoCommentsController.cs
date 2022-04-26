@@ -1,10 +1,11 @@
 ﻿using GeoComment.Data;
 using GeoComment.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace GeoComment.Controllers
 {
-    [Route("api")]
+    [Route("api/geo-comments")]
     [ApiController]
     public class GeoCommentsController : ControllerBase
     {
@@ -16,8 +17,7 @@ namespace GeoComment.Controllers
             _dbContext = dbContext;
         }
 
-        //[ApiVersion("0.1")]
-        [Route("geo-comments")]
+        [ApiVersion("0.1")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -25,9 +25,7 @@ namespace GeoComment.Controllers
         public async Task<ActionResult<Comment>> AddComment(
             Comment comment)
         {
-            if (string.IsNullOrEmpty(comment.Author))
-                return BadRequest();
-            if (string.IsNullOrEmpty(comment.Message))
+            if (string.IsNullOrWhiteSpace(comment.Author) || string.IsNullOrWhiteSpace(comment.Message))
                 return BadRequest();
 
             await _dbContext.Comments.AddAsync(comment);
@@ -36,9 +34,9 @@ namespace GeoComment.Controllers
             return CreatedAtAction(nameof(GetComment), new { id = comment.Id }, comment);
         }
 
-        //[ApiVersion("0.1")]
-        [Route("geo-comments")]
+        [ApiVersion("0.1")]
         [HttpGet]
+        [Route("{id:int}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<Comment>> GetComment(int id)
         {
@@ -51,6 +49,28 @@ namespace GeoComment.Controllers
 
             return comment;
         }
+
+        [ApiVersion("0.1")]
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<Comment>> FindComments([FromQuery] int? minLon, [FromQuery] int? maxLon, [FromQuery] int? minLat, [FromQuery] int? maxLat)
+        {
+            if (minLon is null || maxLon is null || minLat is null ||
+                maxLat is null) return BadRequest();
+
+            var comments = await _dbContext.Comments
+                .Where(c =>
+                    c.Longitude >= minLon &&
+                    c.Longitude <= maxLon &&
+                    c.Latitude >= minLat &&
+                    c.Latitude <= maxLat)
+                .ToArrayAsync();
+
+            return Ok(comments);
+
+        }
+
 
     }
 }

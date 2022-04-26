@@ -1,4 +1,6 @@
 using GeoComment.Data;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,7 +12,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-/*
+
 builder.Services.AddApiVersioning(options =>
 {
     options.ApiVersionReader =
@@ -19,7 +21,7 @@ builder.Services.AddApiVersioning(options =>
     options.DefaultApiVersion = new ApiVersion(1, 1);
     options.AssumeDefaultVersionWhenUnspecified = true;
 });
-*/
+
 
 builder.Services.AddDbContext<GeoCommentsDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
