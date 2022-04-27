@@ -18,7 +18,7 @@ namespace GeoComment.Controllers
             _webHostEnvironment = webHostEnvironment;
         }
 
-        //[ApiVersion("0.1")]
+        [ApiVersion("0.1")]
         [Route("reset-db")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
