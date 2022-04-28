@@ -1,4 +1,5 @@
 using GeoComment.Data;
+using GeoComment.Swagger;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +31,8 @@ builder.Services.AddSwaggerGen(options =>
     {
         options.SwaggerDoc("v0.1", new OpenApiInfo());
         options.SwaggerDoc("v0.2", new OpenApiInfo());
+        options.OperationFilter<AddApiVersionExampleValueOperationFilter>();
+
     });
 
 
@@ -45,7 +48,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(options =>
     {
         options.SwaggerEndpoint($"/swagger/v0.1/swagger.json", "v0.1");
-        options.SwaggerEndpoint($"/swagger/test/swagger.json", "v0.2");
+        options.SwaggerEndpoint($"/swagger/v0.2/swagger.json", "v0.2");
+
     });
 
 }
