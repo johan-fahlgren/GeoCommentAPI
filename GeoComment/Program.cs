@@ -10,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddResponseCaching();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
@@ -29,7 +30,12 @@ builder.Services.AddVersionedApiExplorer(options =>
 
 builder.Services.AddSwaggerGen(options =>
     {
-        options.SwaggerDoc("v0.1", new OpenApiInfo());
+        options.SwaggerDoc("v0.1", new OpenApiInfo
+        {
+            Title = "GeoComments API",
+            Version = "0.1",
+            Description = "GeoCommenter allows users to add and find comments based on geographic location using latitude and longitude"
+        });
         options.SwaggerDoc("v0.2", new OpenApiInfo());
         options.OperationFilter<AddApiVersionExampleValueOperationFilter>();
 
@@ -55,6 +61,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseResponseCaching();
 
 app.UseAuthorization();
 
