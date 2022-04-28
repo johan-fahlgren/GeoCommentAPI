@@ -2,6 +2,7 @@ using GeoComment.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,9 +11,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-
 
 builder.Services.AddApiVersioning(options =>
 {
@@ -23,6 +21,16 @@ builder.Services.AddApiVersioning(options =>
     options.AssumeDefaultVersionWhenUnspecified = true;
 });
 
+builder.Services.AddVersionedApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VV";
+});
+
+builder.Services.AddSwaggerGen(options =>
+    {
+        options.SwaggerDoc("v0.1", new OpenApiInfo());
+        options.SwaggerDoc("v0.2", new OpenApiInfo());
+    });
 
 
 builder.Services.AddDbContext<GeoCommentsDBContext>(options =>
@@ -34,7 +42,12 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint($"/swagger/v0.1/swagger.json", "v0.1");
+        options.SwaggerEndpoint($"/swagger/test/swagger.json", "v0.2");
+    });
+
 }
 
 app.UseHttpsRedirection();
