@@ -19,6 +19,7 @@ namespace GeoComment.Controllers
         }
 
         [ApiVersion("0.1")]
+        [ApiVersion("0.2")]
         [Route("reset-db")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]

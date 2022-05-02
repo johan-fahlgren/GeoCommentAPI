@@ -1,6 +1,6 @@
 using GeoComment.Data;
+using GeoComment.Models;
 using GeoComment.Swagger;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +20,7 @@ builder.Services.AddApiVersioning(options =>
     options.ApiVersionReader =
         new QueryStringApiVersionReader("api-version");
     options.ReportApiVersions = true;
-    options.DefaultApiVersion = new ApiVersion(1, 1);
+    options.DefaultApiVersion = new ApiVersion(0, 1);
     options.AssumeDefaultVersionWhenUnspecified = true;
 });
 
@@ -46,7 +46,7 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddDbContext<GeoCommentsDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddIdentityCore<IdentityUser>()
+builder.Services.AddIdentityCore<User>()
     .AddEntityFrameworkStores<GeoCommentsDBContext>();
 
 var app = builder.Build();
@@ -68,8 +68,6 @@ app.UseHttpsRedirection();
 
 app.UseResponseCaching();
 
-app.UseAuthentication();
-
 app.UseAuthorization();
 
 app.MapControllers();
@@ -79,6 +77,7 @@ using (var scope = app.Services.CreateScope())
     var ctx = scope.ServiceProvider
         .GetRequiredService<GeoCommentsDBContext>();
 
+    ctx.Database.EnsureDeleted();
     ctx.Database.EnsureCreated();
 }
 
