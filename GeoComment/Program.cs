@@ -1,5 +1,6 @@
 using GeoComment.Data;
 using GeoComment.Swagger;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
@@ -45,6 +46,9 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddDbContext<GeoCommentsDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddIdentityCore<IdentityUser>()
+    .AddEntityFrameworkStores<GeoCommentsDBContext>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -63,6 +67,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseResponseCaching();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
