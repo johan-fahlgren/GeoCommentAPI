@@ -1,26 +1,28 @@
 ﻿using GeoComment.Data;
+using GeoComment.DTOs;
 using GeoComment.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace GeoComment.Controllers
 {
-    [Route("api/geo-comments")]
+    [Route("api/[controller]")]
     [ApiController]
-    public class GeoCommentsController : ControllerBase
+    public class GeoCommentsControllerV0 : ControllerBase
     {
-
         private readonly GeoCommentsDBContext _dbContext;
 
-        public GeoCommentsController(GeoCommentsDBContext dbContext)
+
+        public GeoCommentsControllerV0(GeoCommentsDBContext dbContext)
         {
             _dbContext = dbContext;
         }
 
-        [ApiVersion("0.1")]
+        [ApiVersion("0.2")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+
+
 
         public async Task<ActionResult<Comment>> AddComment(
             NewComment newComment)
@@ -42,16 +44,11 @@ namespace GeoComment.Controllers
             return CreatedAtAction(nameof(GetComment), new { id = comment.Id }, comment);
         }
 
-        public class NewComment
-        {
-            public string Message { get; set; }
-            public string Author { get; set; }
-            public decimal Longitude { get; set; }
-            public decimal Latitude { get; set; }
-        }
 
 
-        [ApiVersion("0.1")]
+
+        /*
+        [ApiVersion("0.2")]
         [HttpGet]
         [Route("{id:int}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -66,9 +63,9 @@ namespace GeoComment.Controllers
             }
 
             return Ok(comment);
-        }
+        }*/
 
-        [ApiVersion("0.1")]
+        /*[ApiVersion("0.2")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -88,10 +85,7 @@ namespace GeoComment.Controllers
 
             return Ok(comments);
 
-        }
-
+        }*/
 
     }
-
-
 }

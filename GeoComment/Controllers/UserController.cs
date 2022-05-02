@@ -1,5 +1,7 @@
 ﻿using GeoComment.Data;
+using GeoComment.DTOs;
 using GeoComment.Models;
+using GeoComment.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,14 +12,16 @@ namespace GeoComment.Controllers
     public class UserController : ControllerBase
     {
         private readonly GeoCommentsDBContext _dbContext;
-        private readonly UserManager<User> _userManager;
-        private readonly ILogger<User> _logger;
+        private readonly UserManager<GeoUser> _userManager;
+        private readonly GeoUserService _userService;
+        private readonly ILogger<GeoUser> _logger;
 
-        public UserController(GeoCommentsDBContext dbContext, UserManager<User> userManager, ILogger<User> logger)
+        public UserController(GeoCommentsDBContext dbContext, UserManager<GeoUser> userManager, ILogger<GeoUser> logger, GeoUserService userService)
         {
             _dbContext = dbContext;
             _userManager = userManager;
             _logger = logger;
+            _userService = userService;
         }
 
 
@@ -27,13 +31,13 @@ namespace GeoComment.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
 
-        public async Task<ActionResult<User>> AddUser(NewUser newUser)
+        public async Task<ActionResult<GeoUser>> AddUser(NewUser newUser)
         {
 
             if (string.IsNullOrWhiteSpace(newUser.UserName) || string.IsNullOrWhiteSpace(newUser.Password))
                 return BadRequest();
 
-            var user = new User()
+            var user = new GeoUser()
             {
                 UserName = newUser.UserName,
             };
@@ -47,19 +51,10 @@ namespace GeoComment.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError("failed to create user",
-                    ex.ToString());
-
+                _logger.LogError(ex.Message, ex);
             }
 
             return BadRequest();
-        }
-
-        public class NewUser
-        {
-            public string? UserName { get; set; }
-            public string? Password { get; set; }
-
         }
 
 
@@ -69,9 +64,9 @@ namespace GeoComment.Controllers
         [Route("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<User>> GetUser(string id)
+        public async Task<ActionResult<GeoUser>> GetUser(string id)
         {
-            User? user = await _dbContext.Users.FindAsync(id);
+            GeoUser? user = await _userService.FindGeoUser(id);
 
             if (user is null)
             {

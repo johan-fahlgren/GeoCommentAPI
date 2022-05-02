@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace GeoComment.Data
 
 {
-    public class GeoCommentsDBContext : IdentityDbContext<User>
+    public class GeoCommentsDBContext : IdentityDbContext<GeoUser>
     {
         public GeoCommentsDBContext(DbContextOptions options) : base(options)
         {

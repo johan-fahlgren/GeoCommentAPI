@@ -2,7 +2,7 @@
 
 namespace GeoComment.Models
 {
-    public class User : IdentityUser
+    public class GeoUser : IdentityUser
     {
         public ICollection<Comment>? Comments { get; set; }
     }
