@@ -1,29 +1,37 @@
 ﻿using GeoComment.Data;
 using GeoComment.DTOs;
 using GeoComment.Models;
+using GeoComment.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GeoComment.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/geo-comments")]
     [ApiController]
     public class GeoCommentsControllerV0 : ControllerBase
     {
         private readonly GeoCommentsDBContext _dbContext;
+        private readonly JwtManager _jwtManager;
+        private readonly UserManager<GeoUser> _userManager;
+        private readonly GeoCommentService _geoCommentService;
 
 
-        public GeoCommentsControllerV0(GeoCommentsDBContext dbContext)
+        public GeoCommentsControllerV0(GeoCommentsDBContext dbContext, JwtManager jwtManager, UserManager<GeoUser> userManager, GeoCommentService geoCommentService)
         {
             _dbContext = dbContext;
+            _jwtManager = jwtManager;
+            _userManager = userManager;
+            _geoCommentService = geoCommentService;
         }
 
+
+
+        //TODO - link comment to user
         [ApiVersion("0.2")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-
-
-
         public async Task<ActionResult<Comment>> AddComment(
             NewComment newComment)
         {
@@ -47,7 +55,6 @@ namespace GeoComment.Controllers
 
 
 
-        /*
         [ApiVersion("0.2")]
         [HttpGet]
         [Route("{id:int}")]
@@ -55,7 +62,7 @@ namespace GeoComment.Controllers
         [ResponseCache(Duration = 10)]
         public async Task<ActionResult<Comment>> GetComment(int id)
         {
-            Comment? comment = await _dbContext.Comments.FindAsync(id);
+            var comment = await _geoCommentService.FindComment(id);
 
             if (comment is null)
             {
@@ -63,7 +70,7 @@ namespace GeoComment.Controllers
             }
 
             return Ok(comment);
-        }*/
+        }
 
         /*[ApiVersion("0.2")]
         [HttpGet]

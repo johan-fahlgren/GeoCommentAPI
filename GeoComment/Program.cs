@@ -2,19 +2,22 @@ using GeoComment.Data;
 using GeoComment.Models;
 using GeoComment.Services;
 using GeoComment.Swagger;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddScoped<GeoCommentService>();
 builder.Services.AddScoped<GeoUserService>();
-
+builder.Services.AddScoped<JwtManager>();
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddApiVersioning(options =>
@@ -31,6 +34,7 @@ builder.Services.AddVersionedApiExplorer(options =>
     options.GroupNameFormat = "'v'VV";
 });
 
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddSwaggerGen(options =>
     {
         options.SwaggerDoc("v0.1", new OpenApiInfo
@@ -41,7 +45,17 @@ builder.Services.AddSwaggerGen(options =>
         });
         options.SwaggerDoc("v0.2", new OpenApiInfo());
         options.OperationFilter<AddApiVersionExampleValueOperationFilter>();
-
+        //JWT
+        options.AddSecurityDefinition("BearerToken", new OpenApiSecurityScheme
+        {
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            Description = "JWT Authorization header using the Bearer scheme.",
+            Name = "Authorization",
+            In = ParameterLocation.Header,
+        });
+        options.OperationFilter<SecurityRequirementsOperationFilter>();
     });
 
 
@@ -50,6 +64,27 @@ builder.Services.AddDbContext<GeoCommentsDBContext>(options =>
 
 builder.Services.AddIdentityCore<GeoUser>()
     .AddEntityFrameworkStores<GeoCommentsDBContext>();
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        var key =
+            Encoding.ASCII.GetBytes(
+                builder.Configuration["JwtConfig:Secret"]);
+
+        options.SaveToken = true;
+        options.TokenValidationParameters =
+            new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                RequireExpirationTime = false,
+                ValidateLifetime = true,
+            };
+    });
 
 var app = builder.Build();
 
@@ -69,6 +104,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseResponseCaching();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
