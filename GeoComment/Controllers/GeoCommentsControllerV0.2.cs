@@ -2,6 +2,7 @@
 using GeoComment.DTOs;
 using GeoComment.Models;
 using GeoComment.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,6 +29,7 @@ namespace GeoComment.Controllers
 
 
         //TODO - link comment to user
+        [Authorize]
         [ApiVersion("0.2")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]

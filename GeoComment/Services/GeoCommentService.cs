@@ -19,7 +19,31 @@ namespace GeoComment.Services
             var comment = await _dbContext.Comments.FindAsync(id);
             if (comment == null) return null;
 
-            var thisComment = new CommentReturn
+            CommentReturn thisComment;
+
+            if (string.IsNullOrWhiteSpace(comment.Title))
+            {
+                var newTitle = comment.Message.Split(" ")[0];
+
+                thisComment = new CommentReturn
+                {
+                    Latitude = comment.Latitude,
+                    Longitude = comment.Longitude,
+
+                    Body = new Body
+                    {
+                        Author = comment.Author,
+                        Title = newTitle,
+                        Message = comment.Message,
+                    },
+
+                };
+
+                return thisComment;
+
+            }
+
+            thisComment = new CommentReturn
             {
                 Latitude = comment.Latitude,
                 Longitude = comment.Longitude,
@@ -27,7 +51,7 @@ namespace GeoComment.Services
                 Body = new Body
                 {
                     Author = comment.Author,
-                    Titel = comment.Message,
+                    Title = comment.Title,
                     Message = comment.Message,
                 },
 
