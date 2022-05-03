@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -46,16 +47,20 @@ builder.Services.AddSwaggerGen(options =>
         options.SwaggerDoc("v0.2", new OpenApiInfo());
         options.OperationFilter<AddApiVersionExampleValueOperationFilter>();
         //JWT
-        options.AddSecurityDefinition("BearerToken", new OpenApiSecurityScheme
+        options.AddSecurityDefinition("JwtAuth", new OpenApiSecurityScheme
         {
             Type = SecuritySchemeType.Http,
-            Scheme = "bearer",
-            BearerFormat = "JWT",
+            Scheme = "Bearer",
             Description = "JWT Authorization header using the Bearer scheme.",
             Name = "Authorization",
             In = ParameterLocation.Header,
         });
         options.OperationFilter<SecurityRequirementsOperationFilter>();
+
+        var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+        options.IncludeXmlComments(xmlPath);
+
     });
 
 

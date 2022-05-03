@@ -8,7 +8,7 @@ namespace GeoComment.Swagger
     {
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
-            var securityDefinitionName = "BasicAuth";
+            var securityDefinitionName = "JwtAuth";
 
             var requiredScopes = context.MethodInfo
                 .GetCustomAttributes(true)

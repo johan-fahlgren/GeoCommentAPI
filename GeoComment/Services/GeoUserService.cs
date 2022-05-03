@@ -23,7 +23,7 @@ namespace GeoComment.Services
 
         public async Task<GeoUser?> FindGeoUser(string id)
         {
-            return await _dbContext.Users.FindAsync(id);
+            return await _userManager.FindByIdAsync(id);
         }
 
 
