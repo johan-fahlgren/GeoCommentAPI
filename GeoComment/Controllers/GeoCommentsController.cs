@@ -31,6 +31,7 @@ namespace GeoComment.Controllers
             var comment = new Comment()
             {
                 Author = newComment.Author,
+                Title = newComment.Message.Split(" ")[0],
                 Message = newComment.Message,
                 Longitude = newComment.Longitude,
                 Latitude = newComment.Latitude,

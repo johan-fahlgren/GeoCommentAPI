@@ -3,74 +3,58 @@ using GeoComment.DTOs;
 using GeoComment.Models;
 using GeoComment.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace GeoComment.Controllers
 {
+    [ApiVersion("0.2")]
     [Route("api/geo-comments")]
     [ApiController]
     public class GeoCommentsControllerV0_2 : ControllerBase
     {
         private readonly GeoCommentsDBContext _dbContext;
-        private readonly JwtManager _jwtManager;
-        private readonly UserManager<GeoUser> _userManager;
         private readonly GeoCommentService _geoCommentService;
         private readonly GeoUserService _geoUserService;
 
 
-        public GeoCommentsControllerV0_2(GeoCommentsDBContext dbContext, JwtManager jwtManager, UserManager<GeoUser> userManager, GeoCommentService geoCommentService)
+        public GeoCommentsControllerV0_2(GeoCommentsDBContext dbContext, GeoCommentService geoCommentService, GeoUserService geoUserService)
         {
             _dbContext = dbContext;
-            _jwtManager = jwtManager;
-            _userManager = userManager;
             _geoCommentService = geoCommentService;
+            _geoUserService = geoUserService;
         }
 
 
-
-        //TODO - link comment to user
         [Authorize]
-        [ApiVersion("0.2")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<Comment>> AddComment(
             NewCommentV0_2 newComment)
         {
-            if (string.IsNullOrWhiteSpace(newComment.Body.Author) ||
-                string.IsNullOrWhiteSpace(newComment.Body.Title) ||
-                string.IsNullOrWhiteSpace(newComment.Body.Message))
-                return BadRequest();
-
             var user = HttpContext.User;
-            var userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier).Value;
+            var userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             var userName = await _geoUserService.FindGeoUser(userId);
 
             if (userName is null) return Unauthorized();
 
-            var comment = new Comment()
-            {
-                Author = userName.UserName,
-                Title = newComment.Body.Title,
-                Message = newComment.Body.Message,
-                Longitude = newComment.Longitude,
-                Latitude = newComment.Latitude,
-            };
+            newComment.Body.Author = userName.UserName;
 
-            await _dbContext.Comments.AddAsync(comment);
-            await _dbContext.SaveChangesAsync();
+            var createdComment = await _geoCommentService.CreateComment(newComment);
+            if (createdComment == null) return BadRequest();
 
-            return CreatedAtAction(nameof(GetComment), new { id = comment.Id }, comment);
+            var response =
+                ResponseCommentV0_2.CreateReturn(createdComment);
+
+
+            return CreatedAtAction(nameof(GetComment), new { id = response.Id }, response);
         }
 
 
-
-
-        [ApiVersion("0.2")]
         [HttpGet]
         [Route("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ResponseCache(Duration = 10)]
         public async Task<ActionResult<ResponseCommentV0_2>> GetComment(int id)
@@ -82,70 +66,70 @@ namespace GeoComment.Controllers
                 return NotFound();
             }
 
-            ResponseCommentV0_2 thisComment;
-
             if (string.IsNullOrWhiteSpace(comment.Title))
             {
-                var newTitle = comment.Message.Split(" ")[0];
-
-                thisComment = new ResponseCommentV0_2()
-                {
-                    Id = comment.Id,
-                    Latitude = comment.Latitude,
-                    Longitude = comment.Longitude,
-
-                    Body = new Body
-                    {
-                        Author = comment.Author,
-                        Title = newTitle,
-                        Message = comment.Message,
-                    },
-
-                };
-
-                return Ok(thisComment);
-
+                comment.Title = comment.Message.Split(" ")[0];
             }
 
-            thisComment = new ResponseCommentV0_2()
-            {
-                Id = comment.Id,
-                Latitude = comment.Latitude,
-                Longitude = comment.Longitude,
-
-                Body = new Body
-                {
-                    Author = comment.Author,
-                    Title = comment.Title,
-                    Message = comment.Message,
-                },
-
-            };
+            var thisComment = ResponseCommentV0_2.CreateReturn(comment);
 
             return Ok(thisComment);
         }
 
-        /*[ApiVersion("0.2")]
+
+        [HttpGet]
+        [Route("{userName}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ResponseCache(Duration = 10)]
+        public async Task<ActionResult<ResponseCommentV0_2>>
+            GetAllUserComments(string userName)
+        {
+            var comments = await _geoCommentService.FindAllUserComments(userName);
+
+            if (comments.Length == 0) return NotFound();
+
+            var responseList = new List<ResponseCommentV0_2>();
+
+            foreach (var comment in comments)
+            {
+                var response = ResponseCommentV0_2.CreateReturn(comment);
+                responseList.Add(response);
+            }
+
+            return Ok(responseList);
+        }
+
+
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ResponseCache(Duration = 10)]
-        public async Task<ActionResult<Comment>> FindComments([FromQuery] decimal? minLon, [FromQuery] decimal? maxLon, [FromQuery] decimal? minLat, [FromQuery] decimal? maxLat)
+        public async Task<ActionResult<ResponseCommentV0_2>> FindComments([FromQuery] decimal? minLon, [FromQuery] decimal? maxLon, [FromQuery] decimal? minLat, [FromQuery] decimal? maxLat)
         {
             if (minLon is null || maxLon is null || minLat is null ||
                 maxLat is null) return BadRequest();
 
-            var comments = await _dbContext.Comments
-                .Where(c =>
-                    c.Longitude >= minLon &&
-                    c.Longitude <= maxLon &&
-                    c.Latitude >= minLat &&
-                    c.Latitude <= maxLat)
-                .ToArrayAsync();
+            var comments = await
+                _geoCommentService.FindAllGeoComments(minLon, maxLon,
+                    minLat, maxLat);
 
-            return Ok(comments);
+            if (comments.Length == 0) return NotFound();
 
-        }*/
+            var responseList = new List<ResponseCommentV0_2>();
+
+            foreach (var comment in comments)
+            {
+                var response = ResponseCommentV0_2.CreateReturn(comment);
+                responseList.Add(response);
+            }
+
+            return Ok(responseList);
+
+        }
+
+
+
 
     }
 }

@@ -14,11 +14,12 @@ namespace GeoComment.Services
         private readonly ILogger<GeoUser> _logger;
 
 
-        public GeoUserService(GeoCommentsDBContext dbContext, UserManager<GeoUser> userManager, JwtManager jwtManager)
+        public GeoUserService(GeoCommentsDBContext dbContext, UserManager<GeoUser> userManager, JwtManager jwtManager, ILogger<GeoUser> logger)
         {
             _dbContext = dbContext;
             _userManager = userManager;
             _jwtManager = jwtManager;
+            _logger = logger;
         }
 
 
@@ -46,8 +47,6 @@ namespace GeoComment.Services
             return null;
 
         }
-
-
 
         public async Task<GeoUser?> FindGeoUser(string id)
         {
