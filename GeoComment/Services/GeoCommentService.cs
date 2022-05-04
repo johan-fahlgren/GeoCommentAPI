@@ -1,6 +1,7 @@
 ﻿using GeoComment.Data;
 using GeoComment.DTOs;
 using GeoComment.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace GeoComment.Services
@@ -9,33 +10,37 @@ namespace GeoComment.Services
     {
 
         private readonly GeoCommentsDBContext _dbContext;
+        private readonly UserManager<GeoUser> _userManager;
 
 
-        public GeoCommentService(GeoCommentsDBContext dbContext)
+        public GeoCommentService(GeoCommentsDBContext dbContext, UserManager<GeoUser> userManager)
         {
             _dbContext = dbContext;
+            _userManager = userManager;
         }
 
 
         public async Task<Comment> CreateComment(
-            NewCommentV0_2 newComment)
+            NewCommentV0_2 newComment, string userId)
         {
+            var user = await _userManager.FindByIdAsync(userId);
 
-            if (string.IsNullOrWhiteSpace(newComment.Body.Author) ||
-                string.IsNullOrWhiteSpace(newComment.Body.Title) ||
+            if (string.IsNullOrWhiteSpace(newComment.Body.Title) ||
                 string.IsNullOrWhiteSpace(newComment.Body.Message))
                 return null;
 
             var comment = new Comment()
             {
-                Author = newComment.Body.Author,
+                Author = user.UserName,
                 Title = newComment.Body.Title,
                 Message = newComment.Body.Message,
                 Longitude = newComment.Longitude,
                 Latitude = newComment.Latitude,
+                User = user,
             };
 
-            var addComment = await _dbContext.Comments.AddAsync(comment);
+            var addComment =
+                await _dbContext.Comments.AddAsync(comment);
 
             await _dbContext.SaveChangesAsync();
 
@@ -52,17 +57,17 @@ namespace GeoComment.Services
             return comment;
         }
 
-        public async Task<Comment[]> FindAllUserComments(string userName)
+        public async Task<List<Comment>> FindAllUserComments(string userName)
         {
             var comments = await _dbContext.Comments
                 .Where(c => c.Author == userName)
-                .ToArrayAsync();
+                .ToListAsync();
 
             return comments;
         }
 
 
-        public async Task<Comment[]> FindAllGeoComments(decimal? minLon, decimal? maxLon, decimal? minLat, decimal? maxLat)
+        public async Task<List<Comment>> FindAllGeoComments(decimal? minLon, decimal? maxLon, decimal? minLat, decimal? maxLat)
         {
             var comments = await _dbContext.Comments
                 .Where(c =>
@@ -70,10 +75,45 @@ namespace GeoComment.Services
                     c.Longitude <= maxLon &&
                     c.Latitude >= minLat &&
                     c.Latitude <= maxLat)
-                .ToArrayAsync();
+                .ToListAsync();
 
             return comments;
         }
+
+
+        public async Task<ResponseCommentV0_2> DeleteComment(int id, string userId)
+        {
+
+            var user = await _dbContext.Users
+                .Include(u => u.Comments)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user is null) return null;
+
+            var comment = user.Comments.FirstOrDefault(c => c.Id == id);
+
+            if (comment is null) return null;
+
+            var responseComment = new ResponseCommentV0_2()
+            {
+                Id = comment.Id,
+                Latitude = comment.Latitude,
+                Longitude = comment.Longitude,
+                Body = new Body()
+                {
+                    Author = comment.Author,
+                    Title = comment.Title,
+                    Message = comment.Message,
+                }
+            };
+
+            _dbContext.Comments.Remove(comment);
+            _dbContext.SaveChangesAsync();
+
+            return responseComment;
+        }
+
+
 
 
 

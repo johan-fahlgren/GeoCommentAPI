@@ -1,5 +1,4 @@
-﻿using GeoComment.Data;
-using GeoComment.DTOs;
+﻿using GeoComment.DTOs;
 using GeoComment.Models;
 using GeoComment.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -13,14 +12,12 @@ namespace GeoComment.Controllers
     [ApiController]
     public class GeoCommentsControllerV0_2 : ControllerBase
     {
-        private readonly GeoCommentsDBContext _dbContext;
         private readonly GeoCommentService _geoCommentService;
         private readonly GeoUserService _geoUserService;
 
 
-        public GeoCommentsControllerV0_2(GeoCommentsDBContext dbContext, GeoCommentService geoCommentService, GeoUserService geoUserService)
+        public GeoCommentsControllerV0_2(GeoCommentService geoCommentService, GeoUserService geoUserService)
         {
-            _dbContext = dbContext;
             _geoCommentService = geoCommentService;
             _geoUserService = geoUserService;
         }
@@ -39,9 +36,9 @@ namespace GeoComment.Controllers
 
             if (userName is null) return Unauthorized();
 
-            newComment.Body.Author = userName.UserName;
+            //newComment.Body.Author = userName.UserName;
 
-            var createdComment = await _geoCommentService.CreateComment(newComment);
+            var createdComment = await _geoCommentService.CreateComment(newComment, userId);
             if (createdComment == null) return BadRequest();
 
             var response =
@@ -87,7 +84,7 @@ namespace GeoComment.Controllers
         {
             var comments = await _geoCommentService.FindAllUserComments(userName);
 
-            if (comments.Length == 0) return NotFound();
+            if (comments.Count == 0) return NotFound();
 
             var responseList = new List<ResponseCommentV0_2>();
 
@@ -114,7 +111,7 @@ namespace GeoComment.Controllers
                 _geoCommentService.FindAllGeoComments(minLon, maxLon,
                     minLat, maxLat);
 
-            if (comments.Length == 0) return NotFound();
+            if (comments.Count == 0) return NotFound();
 
             var responseList = new List<ResponseCommentV0_2>();
 
@@ -126,6 +123,30 @@ namespace GeoComment.Controllers
 
             return Ok(responseList);
 
+        }
+
+        [Authorize]
+        [HttpDelete]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Route("{id:int}")]
+        public async Task<ActionResult> DeleteComment(int id)
+        {
+            var user = HttpContext.User;
+            var userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            var userName = await _geoUserService.FindGeoUser(userId);
+
+            if (userName is null) return Unauthorized();
+
+            var commentExists = await _geoCommentService.FindComment(id);
+            if (commentExists is null) return NotFound();
+
+            var commentDeleted = await
+                _geoCommentService.DeleteComment(id, userId);
+
+            if (commentDeleted is null) return Unauthorized();
+
+            return Ok(commentDeleted);
         }
 
 
