@@ -1,7 +1,6 @@
 ﻿using GeoComment.DTOs;
 using GeoComment.Models;
 using GeoComment.Services;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GeoComment.Controllers
@@ -10,15 +9,11 @@ namespace GeoComment.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-
-        private readonly UserManager<GeoUser> _userManager;
         private readonly GeoUserService _userService;
-        private readonly ILogger<GeoUser> _logger;
 
-        public UserController(UserManager<GeoUser> userManager, ILogger<GeoUser> logger, GeoUserService userService)
+
+        public UserController(GeoUserService userService)
         {
-            _userManager = userManager;
-            _logger = logger;
             _userService = userService;
         }
 
@@ -35,32 +30,21 @@ namespace GeoComment.Controllers
             if (string.IsNullOrWhiteSpace(newUser.UserName) || string.IsNullOrWhiteSpace(newUser.Password))
                 return BadRequest();
 
-            var user = new GeoUser()
+            var userCreated = await _userService.CreateUser(newUser);
+
+            if (userCreated is null) return BadRequest();
+
+
+            var responseUser = new ResponseUser()
             {
-                UserName = newUser.UserName,
+                Id = userCreated.Id,
+                Username = userCreated.UserName
             };
 
-            try
-            {
-                var CreateUser =
-                    await _userManager.CreateAsync(user,
-                        newUser.Password);
 
-                var responseUser = new ResponseUser()
-                {
-                    Id = user.Id,
-                    Username = user.UserName
-                };
+            return CreatedAtAction(nameof(GetUser), new { id = userCreated.Id }, responseUser);
 
 
-                if (CreateUser.Succeeded) return CreatedAtAction(nameof(GetUser), new { id = user.Id }, responseUser);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message, ex);
-            }
-
-            return BadRequest();
         }
 
 
@@ -70,7 +54,7 @@ namespace GeoComment.Controllers
         [Route("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<GeoUser>> GetUser(string id)
+        public async Task<ActionResult<ResponseUser>> GetUser(string id)
         {
             var user = await _userService.FindGeoUser(id);
 
@@ -79,7 +63,14 @@ namespace GeoComment.Controllers
                 return NotFound();
             }
 
-            return Ok(user);
+            var responseUser = new ResponseUser()
+            {
+                Id = user.Id,
+                Username = user.UserName
+            };
+
+
+            return Ok(responseUser);
         }
 
         [HttpPost]
