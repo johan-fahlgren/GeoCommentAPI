@@ -19,7 +19,12 @@ namespace GeoComment.Services
             _userManager = userManager;
         }
 
-
+        /// <summary>
+        /// Takes comment data and creates a new comment and adds it to database.
+        /// </summary>
+        /// <param name="newComment">Comment data to add</param>
+        /// <param name="userId">Logged in user Id</param>
+        /// <returns>Returns added comment</returns>
         public async Task<Comment> CreateComment(
             NewCommentV0_2 newComment, string userId)
         {
@@ -49,6 +54,12 @@ namespace GeoComment.Services
 
         }
 
+
+        /// <summary>
+        /// Finds specified comment from Id parameter
+        /// </summary>
+        /// <param name="id">Comment Id</param>
+        /// <returns>Returns comment if found</returns>
         public async Task<Comment> FindComment(int id)
         {
             var comment = await _dbContext.Comments.FindAsync(id);
@@ -84,15 +95,13 @@ namespace GeoComment.Services
         public async Task<ResponseCommentV0_2> DeleteComment(int id, string userId)
         {
 
-            var user = await _dbContext.Users
-                .Include(u => u.Comments)
-                .FirstOrDefaultAsync(u => u.Id == userId);
-
-            if (user is null) return null;
-
-            var comment = user.Comments.FirstOrDefault(c => c.Id == id);
+            var comment = await _dbContext.Comments
+                .Include(c => c.User)
+                .FirstOrDefaultAsync(c => c.Id == id);
 
             if (comment is null) return null;
+
+            if (comment.User is null || comment.User.Id != userId) throw new UnauthorizedException();
 
             var responseComment = new ResponseCommentV0_2()
             {
@@ -108,16 +117,15 @@ namespace GeoComment.Services
             };
 
             _dbContext.Comments.Remove(comment);
-            _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
 
             return responseComment;
         }
 
+    }
 
-
-
-
-
+    public class UnauthorizedException : Exception //Tack Kim :D!
+    {
 
     }
 }
