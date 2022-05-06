@@ -22,7 +22,11 @@ namespace GeoComment.Services
             _logger = logger;
         }
 
-
+        /// <summary>
+        /// Creates user from added login credentials and adds to database.
+        /// </summary>
+        /// <param name="credentials">Credentials includes username and password</param>
+        /// <returns>Returns user if created</returns>
         public async Task<GeoUser> CreateUser(LoginCredentials credentials)
         {
             var user = new GeoUser()
@@ -48,12 +52,21 @@ namespace GeoComment.Services
 
         }
 
+        /// <summary>
+        /// Finds user in database.
+        /// </summary>
+        /// <param name="id">user id</param>
+        /// <returns>Returns user</returns>
         public async Task<GeoUser?> FindGeoUser(string id)
         {
             return await _userManager.FindByIdAsync(id);
         }
 
-
+        /// <summary>
+        /// Finds user in database and checks if login credentials matches and then generates JWT.
+        /// </summary>
+        /// <param name="credentials">Login credentials</param>
+        /// <returns>Returns JWT if user exists else Null</returns>
         public async Task<object> Login(LoginCredentials credentials)
         {
             var thisUser = await

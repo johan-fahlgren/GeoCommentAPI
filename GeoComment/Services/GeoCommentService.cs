@@ -51,13 +51,11 @@ namespace GeoComment.Services
 
             return addComment.Entity;
 
-
         }
 
 
         /// <summary>
-        /// Finds specified comment from Id parameter
-        /// </summary>
+        /// Finds one specific comment in database.
         /// <param name="id">Comment Id</param>
         /// <returns>Returns comment if found</returns>
         public async Task<Comment> FindComment(int id)
@@ -68,6 +66,11 @@ namespace GeoComment.Services
             return comment;
         }
 
+        /// <summary>
+        /// Finds all comments in database added by specific user.
+        /// </summary>
+        /// <param name="userName">Username</param>
+        /// <returns>Returns list of comment from user</returns>
         public async Task<List<Comment>> FindAllUserComments(string userName)
         {
             var comments = await _dbContext.Comments
@@ -77,7 +80,14 @@ namespace GeoComment.Services
             return comments;
         }
 
-
+        /// <summary>
+        ///  Finds all Geo-Comments in database in specified area range.
+        /// </summary>
+        /// <param name="minLon">Longitude minimum value</param>
+        /// <param name="maxLon">Longitude maximum value</param>
+        /// <param name="minLat">Latitude minimum value</param>
+        /// <param name="maxLat">Latitude maximum value</param>
+        /// <returns>Returns list of comments within area</returns>
         public async Task<List<Comment>> FindAllGeoComments(decimal? minLon, decimal? maxLon, decimal? minLat, decimal? maxLat)
         {
             var comments = await _dbContext.Comments
@@ -91,8 +101,14 @@ namespace GeoComment.Services
             return comments;
         }
 
-
-        public async Task<ResponseCommentV0_2> DeleteComment(int id, string userId)
+        /// <summary>
+        /// Deletes comment from database if user-id and comment-id matches.
+        /// </summary>
+        /// <param name="id">Id of comment to delete</param>
+        /// <param name="userId">Id of logged in user</param>
+        /// <returns>Returns deleted comment data if everything OK, else returns null or exception if id's don't match</returns>
+        /// <exception cref="UnauthorizedException"></exception>
+        public async Task<Comment> DeleteComment(int id, string userId)
         {
 
             var comment = await _dbContext.Comments
@@ -103,18 +119,7 @@ namespace GeoComment.Services
 
             if (comment.User is null || comment.User.Id != userId) throw new UnauthorizedException();
 
-            var responseComment = new ResponseCommentV0_2()
-            {
-                Id = comment.Id,
-                Latitude = comment.Latitude,
-                Longitude = comment.Longitude,
-                Body = new Body()
-                {
-                    Author = comment.Author,
-                    Title = comment.Title,
-                    Message = comment.Message,
-                }
-            };
+            var responseComment = comment;
 
             _dbContext.Comments.Remove(comment);
             await _dbContext.SaveChangesAsync();
@@ -123,7 +128,9 @@ namespace GeoComment.Services
         }
 
     }
-
+    /// <summary>
+    /// Helper exception to get extra return type for ``DeleteComment`` Task.  
+    /// </summary>
     public class UnauthorizedException : Exception //Tack Kim :D!
     {
 

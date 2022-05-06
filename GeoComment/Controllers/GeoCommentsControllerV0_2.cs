@@ -170,7 +170,10 @@ namespace GeoComment.Controllers
                 var commentDeleted = await
                     _geoCommentService.DeleteComment(id, userId);
                 if (commentDeleted is null) return NotFound();
-                return Ok(commentDeleted);
+
+                var responseComment = ResponseCommentV0_2.CreateReturn(commentDeleted);
+
+                return Ok(responseComment);
             }
             catch (UnauthorizedException)
             {
