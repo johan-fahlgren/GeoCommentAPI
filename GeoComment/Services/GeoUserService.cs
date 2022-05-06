@@ -23,18 +23,18 @@ namespace GeoComment.Services
         }
 
 
-        public async Task<GeoUser> CreateUser(UserData newUser)
+        public async Task<GeoUser> CreateUser(LoginCredentials credentials)
         {
             var user = new GeoUser()
             {
-                UserName = newUser.UserName
+                UserName = credentials.UserName
             };
 
             try
             {
                 var CreateUser =
                     await _userManager.CreateAsync(user,
-                        newUser.Password);
+                        credentials.Password);
 
                 if (CreateUser.Succeeded) return user;
 
@@ -54,15 +54,15 @@ namespace GeoComment.Services
         }
 
 
-        public async Task<object> Login(UserData newUser)
+        public async Task<object> Login(LoginCredentials credentials)
         {
             var thisUser = await
-                _userManager.FindByNameAsync(newUser.UserName);
+                _userManager.FindByNameAsync(credentials.UserName);
             if (thisUser is null) return null;
 
             var userSignedIn = await
                 _userManager.CheckPasswordAsync(thisUser,
-                    newUser.Password);
+                    credentials.Password);
 
             if (userSignedIn is false) return null;
 

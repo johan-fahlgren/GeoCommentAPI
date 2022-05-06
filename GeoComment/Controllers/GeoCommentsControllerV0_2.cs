@@ -40,14 +40,11 @@ namespace GeoComment.Controllers
 
             if (userName is null) return Unauthorized();
 
-            //newComment.Body.Author = userName.UserName;
-
             var createdComment = await _geoCommentService.CreateComment(newComment, userId);
             if (createdComment == null) return BadRequest();
 
             var response =
                 ResponseCommentV0_2.CreateReturn(createdComment);
-
 
             return CreatedAtAction(nameof(GetComment), new { id = response.Id }, response);
         }
@@ -121,7 +118,7 @@ namespace GeoComment.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ResponseCache(Duration = 10)]
-        public async Task<ActionResult<ResponseCommentV0_2>> FindComments([FromQuery] decimal? minLon, [FromQuery] decimal? maxLon, [FromQuery] decimal? minLat, [FromQuery] decimal? maxLat)
+        public async Task<ActionResult<ResponseCommentV0_2>> FindGeoComments([FromQuery] decimal? minLon, [FromQuery] decimal? maxLon, [FromQuery] decimal? minLat, [FromQuery] decimal? maxLat)
         {
             if (minLon is null || maxLon is null || minLat is null ||
                 maxLat is null) return BadRequest();
@@ -163,13 +160,10 @@ namespace GeoComment.Controllers
         {
             var user = HttpContext.User;
             var userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            if (userId == null) return NotFound(); //redundant?
+            if (userId == null) return NotFound(); //redundant?, ``[Authorize]`` stops invalid token before accessing method.
 
             var userName = await _geoUserService.FindGeoUser(userId);
             if (userName is null) return Unauthorized();
-
-            //var commentExists = await _geoCommentService.FindComment(id);
-            //if (commentExists is null) return NotFound();
 
             try
             {

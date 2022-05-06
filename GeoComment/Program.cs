@@ -78,7 +78,7 @@ builder.Services
             Encoding.ASCII.GetBytes(
                 builder.Configuration["JwtConfig:Secret"]);
 
-        options.SaveToken = true;
+
         options.TokenValidationParameters =
             new TokenValidationParameters
             {
@@ -119,8 +119,8 @@ using (var scope = app.Services.CreateScope())
     var ctx = scope.ServiceProvider
         .GetRequiredService<GeoCommentsDBContext>();
 
-    ctx.Database.EnsureDeleted();
-    ctx.Database.EnsureCreated();
+    await ctx.Database.EnsureDeletedAsync();
+    await ctx.Database.EnsureCreatedAsync();
 }
 
 app.Run();

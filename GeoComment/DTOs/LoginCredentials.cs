@@ -1,6 +1,6 @@
 ﻿namespace GeoComment.DTOs
 {
-    public class UserData
+    public class LoginCredentials
     {
         /// <example>kalle</example>>
         public string? UserName { get; set; }

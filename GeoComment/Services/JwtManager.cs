@@ -15,8 +15,6 @@ namespace GeoComment.Services
             _configuration = configuration;
         }
 
-        // Källa för kod:
-        // https://dev.to/moe23/asp-net-core-5-rest-api-authentication-with-jwt-step-by-step-140d
         public string GenerateJwtToken(GeoUser geoUser)
         {
             var key = Encoding.ASCII.GetBytes(_configuration["JwtConfig:Secret"]);
@@ -27,11 +25,8 @@ namespace GeoComment.Services
                 {
                     new Claim(ClaimTypes.NameIdentifier, geoUser.Id),
                     new Claim(ClaimTypes.Name, geoUser.UserName),
-                    // Eventuella roller måste läggas till här
                 }),
-                // Hur länge token ska vara giltlig
                 Expires = DateTime.UtcNow.AddHours(6),
-                // Den hemliga nyckeln och vilken typ av kryptering som används
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha512Signature)
             };
 
