@@ -14,8 +14,6 @@
 
     public class Body
     {
-        /// <example>Kalle</example>>
-        public string? Author { get; set; }
         /// <example>Lorem</example>>
         public string Title { get; set; }
         /// <example>Lorem ipsum dolor sit amet</example>>

@@ -37,7 +37,7 @@ namespace GeoComment.Controllers
                 Latitude = newComment.Latitude,
             };
 
-            await _dbContext.Comments.AddAsync(comment);
+            _dbContext.Comments.Add(comment);
             await _dbContext.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetComment), new { id = comment.Id }, comment);

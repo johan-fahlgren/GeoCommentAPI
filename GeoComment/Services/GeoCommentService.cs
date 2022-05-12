@@ -44,8 +44,7 @@ namespace GeoComment.Services
                 User = user,
             };
 
-            var addComment =
-                await _dbContext.Comments.AddAsync(comment);
+            var addComment = _dbContext.Comments.Add(comment);
 
             await _dbContext.SaveChangesAsync();
 

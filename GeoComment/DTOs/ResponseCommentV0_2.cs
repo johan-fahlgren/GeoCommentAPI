@@ -10,7 +10,7 @@ namespace GeoComment.DTOs
         public decimal Longitude { get; set; }
         /// <example>5</example>>
         public decimal Latitude { get; set; }
-        public Body Body { get; set; }
+        public ResponseBody Body { get; set; }
 
         public static ResponseCommentV0_2 CreateReturn(Comment comment)
         {
@@ -19,7 +19,7 @@ namespace GeoComment.DTOs
                 Id = comment.Id,
                 Latitude = comment.Latitude,
                 Longitude = comment.Longitude,
-                Body = new Body()
+                Body = new ResponseBody()
                 {
                     Author = comment.Author,
                     Title = comment.Title,
@@ -30,6 +30,16 @@ namespace GeoComment.DTOs
             return newComment;
         }
 
+        public class ResponseBody
+        {
+            /// <example>Kalle</example>>
+            public string? Author { get; set; }
+            /// <example>Lorem</example>>
+            public string Title { get; set; }
+            /// <example>Lorem ipsum dolor sit amet</example>>
+            public string Message { get; set; }
+
+        }
     }
 
 
