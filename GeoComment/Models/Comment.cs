@@ -7,7 +7,7 @@
         /// <example>Kalle</example>>
         public string Author { get; set; }
         /// <example>Lorem</example>>
-        public string? Title { get; set; }
+        public string Title { get; set; }
         /// <example>Lorem ipsum dolor sit amet</example>>
         public string Message { get; set; }
 

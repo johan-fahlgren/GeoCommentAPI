@@ -30,6 +30,7 @@ namespace GeoComment.Controllers
 
             var comment = new Comment()
             {
+                User = null, //bad code
                 Author = newComment.Author,
                 Title = newComment.Message.Split(" ")[0],
                 Message = newComment.Message,
@@ -39,6 +40,7 @@ namespace GeoComment.Controllers
 
             _dbContext.Comments.Add(comment);
             await _dbContext.SaveChangesAsync();
+
 
             return CreatedAtAction(nameof(GetComment), new { id = comment.Id }, comment);
         }
