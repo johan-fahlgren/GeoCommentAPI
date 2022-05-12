@@ -30,7 +30,7 @@ namespace GeoComment.Controllers
 
             var comment = new Comment()
             {
-                User = null, //bad code
+                User = null, //bad code?
                 Author = newComment.Author,
                 Title = newComment.Message.Split(" ")[0],
                 Message = newComment.Message,

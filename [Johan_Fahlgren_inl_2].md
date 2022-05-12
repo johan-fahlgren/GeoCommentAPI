@@ -18,7 +18,7 @@ men gillar tanken av att hålla kvar det så när sitt original utförande som möjli
 
 * Headers kan användas istället för query parametrar när man vill använda versionering i sin API. En fördel är att det blir lite 
 mindre rörigt in ens URI, medan en nackdel är kanske att du måste lägga till en specifik header i sin request. Vet inte om det gjort någon jätte stor skillnad 
-för just detta projekt, det är inte särskilt krångligt att lägga till egna headers i Postman men det skulle helt klart göra URIerna mindre röriga.
+för just detta projekt att byta till headers, det är inte särskilt krångligt att lägga till egna headers i Postman men det skulle helt klart göra URIerna mindre röriga.
 
 <br/>
 

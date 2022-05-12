@@ -160,7 +160,7 @@ namespace GeoComment.Controllers
         {
             var user = HttpContext.User;
             var userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            if (userId == null) return NotFound(); //redundant?, ``[Authorize]`` stops invalid token before accessing method.
+            if (userId == null) return NotFound(); //redundant?, ``[Authorize]`` stops invalid token before accessing method?.
 
             var userName = await _geoUserService.FindGeoUser(userId);
             if (userName is null) return Unauthorized();

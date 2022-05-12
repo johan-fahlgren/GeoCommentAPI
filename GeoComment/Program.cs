@@ -13,7 +13,6 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddScoped<GeoCommentService>();
 builder.Services.AddScoped<GeoUserService>();
 builder.Services.AddScoped<JwtManager>();
@@ -35,7 +34,7 @@ builder.Services.AddVersionedApiExplorer(options =>
     options.GroupNameFormat = "'v'VV";
 });
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddSwaggerGen(options =>
     {
         options.SwaggerDoc("v0.1", new OpenApiInfo
@@ -46,7 +45,7 @@ builder.Services.AddSwaggerGen(options =>
         });
         options.SwaggerDoc("v0.2", new OpenApiInfo());
         options.OperationFilter<AddApiVersionExampleValueOperationFilter>();
-        //JWT
+
         options.AddSecurityDefinition("JwtAuth", new OpenApiSecurityScheme
         {
             Type = SecuritySchemeType.Http,
@@ -93,7 +92,6 @@ builder.Services
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
